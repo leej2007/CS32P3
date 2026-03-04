@@ -158,8 +158,6 @@ int StudentWorld::move()
     //cleanup dead actors
     for (int i = m_vA.size() - 1; i >= 0; i--) {
         if (!m_vA[i]->isAlive()) {
-            //count the number of dead lemmings
-            m_lemmingsDead++;
             delete m_vA[i];
             m_vA.erase(m_vA.begin() + i);
         }
@@ -309,7 +307,7 @@ int StudentWorld::checkPheromones(Coord p) {
     int lowestdistance = 999;
     int rightorleft = -1;
     for (size_t k = 0; k < m_vA.size(); k++) {
-        if (m_vA[k]->isLemmingAttractor()) {
+        if (m_vA[k]->isLemmingAttractor() && m_vA[k]->getCoord().y == p.y) {
             //get distance between lemmingattractor and lemming
             int x = p.x - m_vA[k]->GraphObject::getCoord().x;
             //get the absolute value of the distance
