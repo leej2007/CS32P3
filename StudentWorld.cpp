@@ -18,11 +18,13 @@ StudentWorld::StudentWorld(string assetPath)
 {
 }
 
+//add new actors to the vector and keep track of how many lemmings spawned
 void StudentWorld::addActor(Actor* newActor) {
     if(newActor->canBeSaved())
         incrementNumSpawned();
     m_vA.push_back(newActor);
 }
+
 int StudentWorld::init()
 {
     Level lev(assetPath()); // note: GameWorld provides assetPath()
@@ -105,6 +107,7 @@ int StudentWorld::init()
 
     return GWSTATUS_CONTINUE_GAME;
 }
+
 //helper function to fit the display numbers
 string formatWithZeros(int number, int targetwidth) {
     string str = to_string(number);
@@ -119,7 +122,7 @@ string formatWithZeros(int number, int targetwidth) {
 void StudentWorld::updateDisplay()
 {
     string m_tools2;
-    //if m_tools empty, print "none" instead
+    //if m_tools empty, print "None" instead
     if (m_tools == "")
         m_tools2 = "None";
     else
@@ -137,10 +140,10 @@ void StudentWorld::updateDisplay()
     setGameStatText(Displaytext);
 }
 
-//
+
 int StudentWorld::move()
 {
-    //decrement the timer
+    //decrement the timer once per tick
     m_leveltimer--;
 
     //update display
@@ -149,7 +152,7 @@ int StudentWorld::move()
     //move cursor
     m_cursor->doSomething();
 
-    //make all the actors move
+    //make all the actors move, making sure dead lemmings dont move
     for (size_t k = 0; k < m_vA.size(); k++) {
         if (m_vA[k]->isAlive())
             m_vA[k]->doSomething();
@@ -183,7 +186,7 @@ int StudentWorld::move()
             return GWSTATUS_PLAYER_DIED;
         }
     }
-    //end if all possible spawned lemmings are saved or dead
+    //end if all possible spawned lemmings are saved or dead, necessarily being a win
     if (m_lemmingsSaved + m_lemmingsDead == 10) {
         playSound(SOUND_FINISHED_LEVEL);
         increaseScore(m_leveltimer);
@@ -212,7 +215,7 @@ void StudentWorld::cleanUp()
 
 
 //for moving purposes
-bool StudentWorld::somethingSolid(Coord p)
+bool StudentWorld::somethingSolid(Coord p) const
 {
     for (size_t k = 0; k < m_vA.size(); k++) {
         if (m_vA[k]->GraphObject::getCoord() == p && m_vA[k]->isSolid())
@@ -258,7 +261,7 @@ bool StudentWorld::killHere(Coord p) {
 }
 
 //for cursor
-bool StudentWorld::isEmpty(Coord p)
+bool StudentWorld::isEmpty(Coord p) const
 {
     for (size_t k = 0; k < m_vA.size(); k++) {
         if (m_vA[k]->GraphObject::getCoord() == p)
@@ -268,7 +271,7 @@ bool StudentWorld::isEmpty(Coord p)
 }
 
 //for lemming movement
-bool StudentWorld::somethingClimbable(Coord p)
+bool StudentWorld::somethingClimbable(Coord p) const
 {
     for (size_t k = 0; k < m_vA.size(); k++) {
         if (m_vA[k]->GraphObject::getCoord() == p && m_vA[k]->isClimbable())
@@ -282,6 +285,7 @@ void StudentWorld::bounceHelper(Actor* bounceguy, int bounceheight) {
     bounceguy->setBounce(bounceheight);
 }
 
+//bounce function for trampoline and spring
 void StudentWorld::Bounce(Coord p, int type)
 {
     for (size_t k = 0; k < m_vA.size(); k++) {
@@ -303,7 +307,8 @@ void StudentWorld::Bounce(Coord p, int type)
 }
 
 //check for pheromones, returns -1 if none valid, 180 to turn left, and 0 to turn right
-int StudentWorld::checkPheromones(Coord p) {
+int StudentWorld::checkPheromones(Coord p) const
+{
     int lowestdistance = 999;
     int rightorleft = -1;
     for (size_t k = 0; k < m_vA.size(); k++) {

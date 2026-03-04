@@ -18,17 +18,17 @@ public:
   virtual int init();
   virtual int move();
   virtual void cleanUp();
-  bool somethingSolid(Coord p);
+  bool somethingSolid(Coord p) const;
   virtual ~StudentWorld() { cleanUp(); }
   void incrementNumSpawned() { m_lemmingsSpawned++; }
-  int numSpawned() { return m_lemmingsSpawned; }
+  int numSpawned() const { return m_lemmingsSpawned; }
   void addActor(Actor* newActor);
   bool killHere(Coord p);
-  bool isEmpty(Coord p);
-  bool somethingClimbable(Coord p);
+  bool isEmpty(Coord p) const;
+  bool somethingClimbable(Coord p) const;
   void Bounce(Coord p, int type);
   void bounceHelper(Actor* bounceguy, int bounceheight);
-  int checkPheromones(Coord p);
+  int checkPheromones(Coord p) const;
   void kill(Actor* deadguy);
   void save(Actor* savedguy);
   void turn(Coord p, int dir);

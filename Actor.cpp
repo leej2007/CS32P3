@@ -7,19 +7,25 @@ bool Actor::attemptMove(int dir)
 	switch (dir) {
 	case right:
 		//check if you can move right
-		if (!myWorld()->somethingSolid(Coord(position.x + 1, position.y)))
+		if (!myWorld()->somethingSolid(Coord(position.x + 1, position.y))) {
 			moveTo(right);
-		else
+			return true;
+		}
+		else {
 			setDirection(left);
-		return true;
+			return false;
+		}
 		break;
 	case left:
 		//check if you can move left
-		if (!myWorld()->somethingSolid(Coord(position.x - 1, position.y)))
+		if (!myWorld()->somethingSolid(Coord(position.x - 1, position.y))) {
 			moveTo(left);
-		else
+			return true;
+		}
+		else {
 			setDirection(right);
-		return true;
+			return false;
+		}
 		break;
 	case up:
 		//check if you can move up
@@ -48,7 +54,7 @@ void IceMonster::doSomething() {
 	//add 1 to the counter of time since last moved
 	incrementTicks();
 	
-	//kill lemming if there is one here
+	//kill lemming if there is one here, if killed something, no action this turn
 	if (myWorld()->killHere(getCoord()))
 		return;
 
@@ -72,7 +78,7 @@ void IceMonster::doSomething() {
 }
 
 void Factory::doSomething() {
-	//track how long it's been since it last spawned
+	//track how long it's been since it last spawned a lemming
 	incrementTicks();
 
 	if (ticks() % 100 == 0 && myWorld()->numSpawned()<10) {
@@ -81,11 +87,12 @@ void Factory::doSomething() {
 	}
 }
 
-//FIX THIS
 void Cursor::doSomething() {
 	int value = -1;
+	//switch statement for control of player actions
 	if (myWorld()->getKey(value)) {
 		switch (value) {
+			//movement of cursor, staying within bounds
 		case KEY_PRESS_LEFT:
 			if (GraphObject::getCoord().x > 1)
 				GraphObject::moveTo(left);
@@ -102,6 +109,7 @@ void Cursor::doSomething() {
 			if (GraphObject::getCoord().y < VIEW_HEIGHT-2)
 				GraphObject::moveTo(up);
 			break;
+			//create actors from tools
 		case 't':
 		case 'T':
 			if (myWorld()->isEmpty(GraphObject::getCoord()) && myWorld()->useTool('T')) {
@@ -152,11 +160,6 @@ void Cursor::doSomething() {
 }
 
 void Lemming::doSomething() {
-	const int WALKING = 0;
-	const int FALLING = 1;
-	const int CLIMBING = 2;
-	const int BOUNCING = 3;
-
 	//keep track of ticks since last move
 	incrementTicks();
 
@@ -219,7 +222,7 @@ void Lemming::doSomething() {
 
 		return;
 	}
-
+	//climbing actions
 	if (m_state == CLIMBING) {
 		if (!myWorld()->somethingClimbable(getCoord())) {
 			m_state = WALKING;
@@ -228,7 +231,7 @@ void Lemming::doSomething() {
 		attemptMove(up);
 		return;
 	}
-
+	//bouncing actions
 	if (m_state == BOUNCING) {
 		if (myWorld()->somethingClimbable(getCoord())) {
 			m_state = CLIMBING;
@@ -236,11 +239,13 @@ void Lemming::doSomething() {
 		}
 		if (m_upwardSteps > 0) {
 			if (!attemptMove(up)) {
+				//give up bouncing if you hit a ceiling
 				m_upwardSteps = 0;
 			}
 			else
 				m_upwardSteps--;
 		}
+		//move at apex
 		if (m_upwardSteps == 0) {
 			int direction = GraphObject::getDirection();
 			attemptMove(direction);
@@ -252,7 +257,7 @@ void Lemming::doSomething() {
 	}
 }
 
-//short ones
+//short actions
 void Bonfire::doSomething() { myWorld()->killHere(GraphObject::getCoord()); }
 void Trampoline::doSomething() { myWorld()->Bounce(GraphObject::getCoord(), 0); }
 void Door::doSomething() { myWorld()->turn(GraphObject::getCoord(), GraphObject::getDirection()); }
